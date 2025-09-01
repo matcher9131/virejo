@@ -1,64 +1,104 @@
-# VS Code Test File Generator Extension
+# CLAUDE.md
 
-## プロジェクト概要
-TypeScript/TSXファイルから自動でテストファイルを生成するVS Code拡張機能を開発する。
+This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-## 機能要件
+## Project Overview
 
-### 基本機能
-1. **右クリックメニューの追加**
-   - Explorer内でTypeScript（.ts）またはTSXファイル（.tsx）を右クリック
-   - コンテキストメニューに「Generate Test File」オプションを追加
+Virejo is a VS Code extension that automatically generates test files for TypeScript/TSX files. The extension adds a right-click context menu option to generate Vitest-compatible test files with basic structure and import statements.
 
-2. **テストファイル自動生成**
-   - 選択したファイルに対応するテストファイルを自動生成
-   - ファイル名規則：`[元ファイル名].test.ts` または `[元ファイル名].test.tsx`
-   - 生成場所：元ファイルと同じディレクトリ内
+## Key Development Commands
 
-3. **テストファイル内容**
-   - 基本的なテストファイル構造を自動生成
-   - import文の自動挿入
-   - 基本的なdescribe/testブロックの生成
-   - 元ファイルの関数/クラス/コンポーネントを解析してテストスケルトンを生成
+Since this is a VS Code extension project, the following commands will be essential once the project structure is established:
 
-## 技術要件
+```bash
+# Install dependencies
+npm install
 
-### 開発環境
-- TypeScript
-- VS Code Extension API
-- Node.js
+# Compile TypeScript
+npm run compile
 
-### 主要な実装要素
-1. **package.json設定**
-   - contributes.menus.explorer/contextでコンテキストメニュー設定
-   - activationEventsの設定
+# Watch mode for development
+npm run watch
 
-2. **コマンド実装**
-   - ファイル解析機能
-   - テストファイル生成ロジック
-   - ファイルシステム操作
+# Package extension for distribution
+vsce package
 
-3. **ファイル解析**
-   - TypeScript AST解析
-   - export文の抽出
-   - 関数/クラス/コンポーネントの識別
+# Run tests (when implemented)
+npm test
 
-## 追加検討事項
-- 既存のテストファイルがある場合の処理
-- 設定可能なテンプレート
-- カスタムファイル命名規則の設定
+# Lint code (when configured)
+npm run lint
+```
 
-## テストフレームワーク
-- **Vitest専用**：Vitestのテスト構文とAPIに特化
-- Vitestのimport文（`import { describe, it, expect } from 'vitest'`）を自動生成
-- Vitestのモックやユーティリティ関数に対応
+## Architecture Overview
 
-## 期待される成果物
-- VS Code拡張機能パッケージ（.vsix）
-- インストール可能な拡張機能
-- 基本的なドキュメント（README.md）
+**VS Code Extension Structure:**
+- `package.json` - Extension manifest with contribution points for context menus and commands
+- `src/extension.ts` - Main extension entry point with activation/deactivation logic
+- `src/commands/` - Command implementations for test file generation
+- `src/parser/` - TypeScript AST parsing logic to analyze source files
+- `src/generator/` - Test file template generation logic
+- `src/utils/` - File system utilities and helper functions
 
----
+**Core Components:**
 
-**開発指示：**
-上記仕様に基づいて、VS Code拡張機能を開発してください。まず基本的な右クリックメニューの追加とシンプルなテストファイル生成から始めて、段階的に機能を拡張していってください。
+1. **Context Menu Integration** (`package.json` contributions):
+   - `contributes.menus.explorer/context` for right-click menu
+   - `contributes.commands` for command definitions
+   - `activationEvents` for extension activation
+
+2. **File Analysis Engine**:
+   - Uses TypeScript compiler API for AST parsing
+   - Extracts exported functions, classes, and React components
+   - Identifies function signatures and component props
+
+3. **Test Generation Engine**:
+   - Creates Vitest-compatible test files
+   - Generates appropriate import statements
+   - Creates describe/it blocks for discovered exports
+   - Handles both .ts and .tsx file types
+
+## Extension-Specific Requirements
+
+**Target Test Framework:** Vitest
+- Import statement: `import { describe, it, expect } from 'vitest'`
+- Support for component testing with `@testing-library/react` (for TSX files)
+- Mock generation for module dependencies
+
+**File Naming Convention:**
+- Input: `component.tsx` → Output: `component.test.tsx`
+- Input: `utils.ts` → Output: `utils.test.ts`
+- Test files are created in the same directory as source files
+
+**AST Parsing Focus:**
+- Function declarations and expressions
+- Class declarations
+- Default and named exports
+- React functional components (TSX)
+- Interface/type definitions for test data generation
+
+## Development Workflow
+
+1. Start with basic extension scaffold (`yo code` generator)
+2. Implement context menu contribution in `package.json`
+3. Create command handler for file generation
+4. Add TypeScript parser for source code analysis
+5. Implement test template generation
+6. Add error handling and user feedback
+7. Package and test in VS Code development host
+
+## Testing Strategy
+
+The extension should be tested with:
+- Sample TypeScript files with various export patterns
+- React components with different prop structures
+- Edge cases like empty files, syntax errors
+- Existing test file scenarios (overwrite confirmation)
+
+## Extension Dependencies
+
+Key npm packages for implementation:
+- `typescript` - For AST parsing
+- `@types/vscode` - VS Code API types
+- `vsce` - Extension packaging tool
+- `@types/node` - Node.js types for file system operations
