@@ -5,3 +5,5 @@
 !.vscode/extensions.json
 !.vscode/*.code-snippets
 !*.code-workspace
+
+node_modules
