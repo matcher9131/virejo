@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { type ReactElement } from 'react';
 
 interface ButtonProps {
   label: string;
@@ -7,7 +7,7 @@ interface ButtonProps {
   variant?: 'primary' | 'secondary';
 }
 
-export function Button({ label, onClick, disabled = false, variant = 'primary' }: ButtonProps): JSX.Element {
+export function Button({ label, onClick, disabled = false, variant = 'primary' }: ButtonProps): ReactElement {
   return (
     <button
       onClick={onClick}
@@ -42,7 +42,7 @@ const App: React.FC = () => {
       <Card title="Welcome">
         <Button
           label="Click me"
-          onClick={() => alert('Button clicked!')}
+          onClick={() => { console.log('Button clicked!'); }}
         />
       </Card>
     </div>

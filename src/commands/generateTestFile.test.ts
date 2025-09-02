@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import * as vscode from 'vscode';
 import * as fs from 'fs';
-import * as path from 'path';
+// import * as path from 'path';
 import { generateTestFileCommand } from './generateTestFile';
 import { parseTypeScriptFile } from '../parser/tsParser';
 import { generateTestContent } from '../generator/testGenerator';
@@ -83,7 +83,7 @@ describe('generateTestFileCommand', () => {
     mockGetTestFilePath.mockReturnValue(testFilePath);
     mockFs.existsSync.mockReturnValue(true);
     
-    const showQuickPickSpy = vi.spyOn(vscode.window, 'showQuickPick').mockResolvedValue('No');
+    const showQuickPickSpy = vi.spyOn(vscode.window, 'showQuickPick').mockResolvedValue({ label: "No" });
 
     await generateTestFileCommand(mockUri);
 

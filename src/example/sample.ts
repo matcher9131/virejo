@@ -26,7 +26,7 @@ export class UserManager {
 
   async validateUser(id: string): Promise<boolean> {
     const user = this.getUser(id);
-    return user !== undefined;
+    return new Promise(resolve => { resolve(user !== undefined); });
   }
 }
 
