@@ -1,35 +1,22 @@
-import typescriptEslint from '@typescript-eslint/eslint-plugin';
-import typescriptParser from '@typescript-eslint/parser';
+import { defineConfig } from "eslint/config";
+import js from "@eslint/js";
+import tseslint from "typescript-eslint";
 
-export default [
+export default defineConfig([
     {
         files: ['src/**/*.ts', 'src/**/*.tsx'],
         languageOptions: {
-            parser: typescriptParser,
             parserOptions: {
-                ecmaVersion: 6,
-                sourceType: 'module'
-            }
+                project: ["./tsconfig.node.json", "./tsconfig.app.json"],
+                tsconfigRootDir: import.meta.dirname,
+            },
         },
-        plugins: {
-            '@typescript-eslint': typescriptEslint
-        },
-        rules: {
-            '@typescript-eslint/naming-convention': [
-                'warn',
-                {
-                    selector: 'import',
-                    format: ['camelCase', 'PascalCase']
-                }
-            ],
-            '@typescript-eslint/semi': 'warn',
-            curly: 'warn',
-            eqeqeq: 'warn',
-            'no-throw-literal': 'warn',
-            semi: 'off'
-        }
+        plugins: { js },
+        extends: ["js/recommended"],
+        rules: {}
     },
+    tseslint.configs.strictTypeChecked,
     {
         ignores: ['out/**', 'dist/**', '**/*.d.ts']
     }
-];
+]);
