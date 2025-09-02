@@ -93,7 +93,7 @@ export const parseTypeScriptFile = (content: string, filePath: string): Analysis
 }
 
 const handleImportDeclaration = (node: ts.ImportDeclaration, result: AnalysisResult) => {
-    if (!node.moduleSpecifier || !ts.isStringLiteral(node.moduleSpecifier)) {
+    if (/*!node.moduleSpecifier ||*/ !ts.isStringLiteral(node.moduleSpecifier)) {
         return;
     }
 
@@ -207,7 +207,7 @@ const handleClassDeclaration = (node: ts.ClassDeclaration, result: AnalysisResul
     };
 
     node.members.forEach(member => {
-        if (ts.isMethodDeclaration(member) && member.name && ts.isIdentifier(member.name)) {
+        if (ts.isMethodDeclaration(member) && /*member.name &&*/ ts.isIdentifier(member.name)) {
             const methodInfo: FunctionInfo = {
                 name: member.name.text,
                 isAsync: !!(member.modifiers?.some(mod => mod.kind === ts.SyntaxKind.AsyncKeyword)),
@@ -220,7 +220,7 @@ const handleClassDeclaration = (node: ts.ClassDeclaration, result: AnalysisResul
                 isExported: false
             };
             classInfo.methods.push(methodInfo);
-        } else if (ts.isPropertyDeclaration(member) && member.name && ts.isIdentifier(member.name)) {
+        } else if (ts.isPropertyDeclaration(member) && /*member.name &&*/ ts.isIdentifier(member.name)) {
             const propertyInfo: PropertyInfo = {
                 name: member.name.text,
                 type: member.type?.getText(),
@@ -234,7 +234,7 @@ const handleClassDeclaration = (node: ts.ClassDeclaration, result: AnalysisResul
 }
 
 const handleExportAssignment = (node: ts.ExportAssignment, result: AnalysisResult) => {
-    if (node.expression && ts.isIdentifier(node.expression)) {
+    if (/*node.expression &&*/ ts.isIdentifier(node.expression)) {
         const name = node.expression.text;
         
         // Find the corresponding component or function and mark as default export

@@ -84,7 +84,7 @@ const generateImports = (analysis: AnalysisResult, relativePath: string): string
 
 const generateFunctionTests = (func: FunctionInfo): string[] => {
     const lines: string[] = [];
-    const testName = func.isAsync ? 'async function' : 'function';
+    // const testName = func.isAsync ? 'async function' : 'function';
     
     lines.push(`  describe('${func.name}', () => {`);
     lines.push(`    it('should be defined', () => {`);
