@@ -31,7 +31,7 @@ export class UserManager {
 }
 
 const formatName = (firstName: string, lastName?: string): string => {
-  return lastName ? `${firstName} ${lastName}` : firstName;
+  return lastName != null ? `${firstName} ${lastName}` : firstName;
 };
 
 export { formatName };
