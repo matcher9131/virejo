@@ -1,14 +1,15 @@
-import { describe, it, expect } from 'vitest';
+import { it, suite } from 'node:test';
+import { strict as assert } from 'node:assert';
 import { generateTestContent } from './testGenerator';
 import { AnalysisResult } from '../parser/tsParser';
 
-describe('testGenerator', () => {
-  describe('generateTestContent', () => {
-    it('should be defined', () => {
-      expect(generateTestContent).toBeDefined();
+void suite('testGenerator', () => {
+  void suite('generateTestContent', () => {
+    void it('should be defined', () => {
+      assert.ok(typeof generateTestContent === 'function');
     });
 
-    it('should generate basic test content for functions', () => {
+    void it('should generate basic test content for functions', () => {
       const analysis: AnalysisResult = {
         functions: [{
           name: 'add',
@@ -28,14 +29,14 @@ describe('testGenerator', () => {
 
       const result = generateTestContent(analysis, '/test/math.ts');
 
-      expect(result).toContain("import { describe, it, expect } from 'vitest';");
-      expect(result).toContain("import { add } from './math';");
-      expect(result).toContain("describe('math', () => {");
-      expect(result).toContain("describe('add', () => {");
-      expect(result).toContain("expect(add).toBeDefined();");
+      assert.ok(result.includes("import { describe, it, expect } from 'vitest';"));
+      assert.ok(result.includes("import { add } from './math';"));
+      assert.ok(result.includes("describe('math', () => {"));
+      assert.ok(result.includes("describe('add', () => {"));
+      assert.ok(result.includes("expect(add).toBeDefined();"));
     });
 
-    it('should generate test content for React components', () => {
+    void it('should generate test content for React components', () => {
       const analysis: AnalysisResult = {
         functions: [],
         classes: [],
@@ -51,16 +52,16 @@ describe('testGenerator', () => {
 
       const result = generateTestContent(analysis, '/components/Button.tsx');
 
-      expect(result).toContain("import { describe, it, expect } from 'vitest';");
-      expect(result).toContain("import { render, screen } from '@testing-library/react';");
-      expect(result).toContain("import { Button } from './Button';");
-      expect(result).toContain("describe('Button', () => {");
-      expect(result).toContain("should render without crashing");
-      expect(result).toContain("should render with props");
-      expect(result).toContain("should match snapshot");
+      assert.ok(result.includes("import { describe, it, expect } from 'vitest';"));
+      assert.ok(result.includes("import { render, screen } from '@testing-library/react';"));
+      assert.ok(result.includes("import { Button } from './Button';"));
+      assert.ok(result.includes("describe('Button', () => {"));
+      assert.ok(result.includes("should render without crashing"));
+      assert.ok(result.includes("should render with props"));
+      assert.ok(result.includes("should match snapshot"));
     });
 
-    it('should generate test content for classes', () => {
+    void it('should generate test content for classes', () => {
       const analysis: AnalysisResult = {
         functions: [],
         classes: [{
@@ -89,16 +90,16 @@ describe('testGenerator', () => {
 
       const result = generateTestContent(analysis, '/utils/Calculator.ts');
 
-      expect(result).toContain("import { describe, it, expect } from 'vitest';");
-      expect(result).toContain("import { Calculator } from './Calculator';");
-      expect(result).toContain("describe('Calculator', () => {");
-      expect(result).toContain("let instance: Calculator;");
-      expect(result).toContain("instance = new Calculator();");
-      expect(result).toContain("expect(instance).toBeInstanceOf(Calculator);");
-      expect(result).toContain("describe('add', () => {");
+      assert.ok(result.includes("import { describe, it, expect } from 'vitest';"));
+      assert.ok(result.includes("import { Calculator } from './Calculator';"));
+      assert.ok(result.includes("describe('Calculator', () => {"));
+      assert.ok(result.includes("let instance: Calculator;"));
+      assert.ok(result.includes("instance = new Calculator();"));
+      assert.ok(result.includes("expect(instance).toBeInstanceOf(Calculator);"));
+      assert.ok(result.includes("describe('add', () => {"));
     });
 
-    it('should handle async functions', () => {
+    void it('should handle async functions', () => {
       const analysis: AnalysisResult = {
         functions: [{
           name: 'fetchData',
@@ -115,11 +116,11 @@ describe('testGenerator', () => {
 
       const result = generateTestContent(analysis, '/api/client.ts');
 
-      expect(result).toContain("it('should execute without parameters', async () => {");
-      expect(result).toContain("const result = await fetchData();");
+      assert.ok(result.includes("it('should execute without parameters', async () => {"));
+      assert.ok(result.includes("const result = await fetchData();"));
     });
 
-    it('should handle default export React components', () => {
+    void it('should handle default export React components', () => {
       const analysis: AnalysisResult = {
         functions: [],
         classes: [],
@@ -135,11 +136,11 @@ describe('testGenerator', () => {
 
       const result = generateTestContent(analysis, '/App.tsx');
 
-      expect(result).toContain("import App from './App';");
-      expect(result).toContain("render(<App />);");
+      assert.ok(result.includes("import App from './App';"));
+      assert.ok(result.includes("render(<App />);"));
     });
 
-    it('should handle mixed exports', () => {
+    void it('should handle mixed exports', () => {
       const analysis: AnalysisResult = {
         functions: [{
           name: 'helper',
@@ -164,10 +165,10 @@ describe('testGenerator', () => {
 
       const result = generateTestContent(analysis, '/mixed.tsx');
 
-      expect(result).toContain("import Widget, { helper, Service } from './mixed';");
-      expect(result).toContain("describe('mixed', () => {");
-      expect(result).toContain("describe('Service', () => {");
-      expect(result).toContain("describe('Widget', () => {");
+      assert.ok(result.includes("import Widget, { helper, Service } from './mixed';"));
+      assert.ok(result.includes("describe('mixed', () => {"));
+      assert.ok(result.includes("describe('Service', () => {"));
+      assert.ok(result.includes("describe('Widget', () => {"));
     });
   });
 });

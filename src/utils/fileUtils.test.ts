@@ -1,72 +1,73 @@
-import { describe, it, expect } from 'vitest';
+import { it, suite } from 'node:test';
+import { strict as assert } from 'node:assert';
 import { getTestFilePath, isTypeScriptFile, isReactFile } from './fileUtils';
 
-describe('fileUtils', () => {
-  describe('getTestFilePath', () => {
+suite('fileUtils', () => {
+  suite('getTestFilePath', () => {
     it('should be defined', () => {
-      expect(getTestFilePath).toBeDefined();
+      assert.ok(typeof getTestFilePath === 'function');
     });
 
     it('should generate test file path for .ts file', () => {
       const result = getTestFilePath('/src/utils.ts');
-      expect(result).toBe('/src/utils.test.ts');
+      assert.strictEqual(result, '/src/utils.test.ts');
     });
 
     it('should generate test file path for .tsx file', () => {
       const result = getTestFilePath('/src/Component.tsx');
-      expect(result).toBe('/src/Component.test.tsx');
+      assert.strictEqual(result, '/src/Component.test.tsx');
     });
 
     it('should handle nested directory paths', () => {
       const result = getTestFilePath('/src/components/Button.tsx');
-      expect(result).toBe('/src/components/Button.test.tsx');
+      assert.strictEqual(result, '/src/components/Button.test.tsx');
     });
 
     it('should handle files without directory', () => {
       const result = getTestFilePath('index.ts');
-      expect(result).toBe('index.test.ts');
+      assert.strictEqual(result, 'index.test.ts');
     });
   });
 
-  describe('isTypeScriptFile', () => {
+  suite('isTypeScriptFile', () => {
     it('should be defined', () => {
-      expect(isTypeScriptFile).toBeDefined();
+      assert.ok(typeof isTypeScriptFile === 'function');
     });
 
     it('should return true for .ts files', () => {
-      expect(isTypeScriptFile('/path/file.ts')).toBe(true);
+      assert.strictEqual(isTypeScriptFile('/path/file.ts'), true);
     });
 
     it('should return true for .tsx files', () => {
-      expect(isTypeScriptFile('/path/Component.tsx')).toBe(true);
+      assert.strictEqual(isTypeScriptFile('/path/Component.tsx'), true);
     });
 
     it('should return false for .js files', () => {
-      expect(isTypeScriptFile('/path/file.js')).toBe(false);
+      assert.strictEqual(isTypeScriptFile('/path/file.js'), false);
     });
 
     it('should return false for other file types', () => {
-      expect(isTypeScriptFile('/path/file.json')).toBe(false);
-      expect(isTypeScriptFile('/path/file.md')).toBe(false);
+      assert.strictEqual(isTypeScriptFile('/path/file.json'), false);
+      assert.strictEqual(isTypeScriptFile('/path/file.md'), false);
     });
   });
 
-  describe('isReactFile', () => {
+  suite('isReactFile', () => {
     it('should be defined', () => {
-      expect(isReactFile).toBeDefined();
+      assert.ok(typeof isReactFile === 'function');
     });
 
     it('should return true for .tsx files', () => {
-      expect(isReactFile('/path/Component.tsx')).toBe(true);
+      assert.strictEqual(isReactFile('/path/Component.tsx'), true);
     });
 
     it('should return false for .ts files', () => {
-      expect(isReactFile('/path/utils.ts')).toBe(false);
+      assert.strictEqual(isReactFile('/path/utils.ts'), false);
     });
 
     it('should return false for other file types', () => {
-      expect(isReactFile('/path/file.js')).toBe(false);
-      expect(isReactFile('/path/file.json')).toBe(false);
+      assert.strictEqual(isReactFile('/path/file.js'), false);
+      assert.strictEqual(isReactFile('/path/file.json'), false);
     });
   });
 });

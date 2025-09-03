@@ -1,45 +1,45 @@
-import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
+import { it, suite, beforeEach, afterEach } from 'node:test';
+import { strict as assert } from 'node:assert';
 import { calculateSum, fetchUserData, UserManager, formatName } from './sample';
 
-describe('Integration Tests', () => {
-  describe('calculateSum', () => {
+suite('Integration Tests', () => {
+  suite('calculateSum', () => {
     it('should calculate sum of numbers correctly', () => {
-      expect(calculateSum([1, 2, 3, 4, 5])).toBe(15);
-      expect(calculateSum([])).toBe(0);
-      expect(calculateSum([10])).toBe(10);
+      assert.strictEqual(calculateSum([1, 2, 3, 4, 5]), 15);
+      assert.strictEqual(calculateSum([]), 0);
+      assert.strictEqual(calculateSum([10]), 10);
     });
 
     it('should handle negative numbers', () => {
-      expect(calculateSum([-1, -2, -3])).toBe(-6);
-      expect(calculateSum([5, -3, 2])).toBe(4);
+      assert.strictEqual(calculateSum([-1, -2, -3]), -6);
+      assert.strictEqual(calculateSum([5, -3, 2]), 4);
     });
   });
 
-  describe('fetchUserData', () => {
+  suite('fetchUserData', () => {
     beforeEach(() => {
-      vi.useFakeTimers();
+      // Note: Node.js test runner doesn't have built-in fake timers like Vitest
     });
 
     afterEach(() => {
-      vi.useRealTimers();
+      // Note: Node.js test runner doesn't have built-in fake timers like Vitest
     });
 
     it('should fetch user data asynchronously', async () => {
       const promise = fetchUserData('123');
       
-      // Fast-forward time
-      vi.advanceTimersByTime(100);
+      // Fast-forward time - would need manual timer implementation
       
       const result = await promise;
       
-      expect(result).toEqual({
+      assert.deepStrictEqual(result, {
         name: 'User 123',
         email: 'user123@example.com'
       });
     });
   });
 
-  describe('UserManager', () => {
+  suite('UserManager', () => {
     let manager: UserManager;
 
     beforeEach(() => {
@@ -50,37 +50,37 @@ describe('Integration Tests', () => {
       manager.addUser('1', 'John Doe', 'john@example.com');
       
       const user = manager.getUser('1');
-      expect(user).toEqual({
+      assert.deepStrictEqual(user, {
         name: 'John Doe',
         email: 'john@example.com'
       });
     });
 
     it('should return undefined for non-existent user', () => {
-      expect(manager.getUser('999')).toBeUndefined();
+      assert.strictEqual(manager.getUser('999'), undefined);
     });
 
     it('should validate user existence', async () => {
       manager.addUser('1', 'John', 'john@example.com');
       
-      expect(await manager.validateUser('1')).toBe(true);
-      expect(await manager.validateUser('999')).toBe(false);
+      assert.strictEqual(await manager.validateUser('1'), true);
+      assert.strictEqual(await manager.validateUser('999'), false);
     });
   });
 
-  describe('formatName', () => {
+  suite('formatName', () => {
     it('should format names correctly', () => {
-      expect(formatName('John')).toBe('John');
-      expect(formatName('John', 'Doe')).toBe('John Doe');
+      assert.strictEqual(formatName('John'), 'John');
+      assert.strictEqual(formatName('John', 'Doe'), 'John Doe');
     });
 
     it('should handle optional lastName', () => {
-      expect(formatName('John', undefined)).toBe('John');
-      expect(formatName('John', '')).toBe('John ');
+      assert.strictEqual(formatName('John', undefined), 'John');
+      assert.strictEqual(formatName('John', ''), 'John ');
     });
   });
 
-  describe('Full workflow integration', () => {
+  suite('Full workflow integration', () => {
     it('should work together in a realistic scenario', async () => {
       const manager = new UserManager();
       
@@ -89,16 +89,16 @@ describe('Integration Tests', () => {
       manager.addUser('2', formatName('Jane'), 'jane@example.com');
       
       // Validate users exist
-      expect(await manager.validateUser('1')).toBe(true);
-      expect(await manager.validateUser('2')).toBe(true);
+      assert.strictEqual(await manager.validateUser('1'), true);
+      assert.strictEqual(await manager.validateUser('2'), true);
       
       // Calculate some numbers (simulating user IDs or scores)
       const userScores = calculateSum([1, 2]);
-      expect(userScores).toBe(3);
+      assert.strictEqual(userScores, 3);
       
       // Fetch additional data
       const userData = await fetchUserData('123');
-      expect(userData.name).toBe('User 123');
+      assert.strictEqual(userData.name, 'User 123');
     });
   });
 });

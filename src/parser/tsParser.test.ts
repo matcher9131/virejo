@@ -1,10 +1,11 @@
-import { describe, it, expect } from 'vitest';
+import { it, suite } from 'node:test';
+import { strict as assert } from 'node:assert';
 import { parseTypeScriptFile } from './tsParser';
 
-describe('tsParser', () => {
-  describe('parseTypeScriptFile', () => {
+suite('tsParser', () => {
+  suite('parseTypeScriptFile', () => {
     it('should be defined', () => {
-      expect(parseTypeScriptFile).toBeDefined();
+      assert.ok(typeof parseTypeScriptFile === 'function');
     });
 
     it('should parse function declarations', () => {
@@ -20,8 +21,8 @@ describe('tsParser', () => {
 
       const result = parseTypeScriptFile(content, 'test.ts');
 
-      expect(result.functions).toHaveLength(2);
-      expect(result.functions[0]).toEqual({
+      assert.strictEqual(result.functions.length, 2);
+      assert.deepStrictEqual(result.functions[0], {
         name: 'add',
         isAsync: false,
         parameters: [
@@ -31,8 +32,8 @@ describe('tsParser', () => {
         returnType: 'number',
         isExported: true
       });
-      expect(result.functions[1].name).toBe('helper');
-      expect(result.functions[1].isExported).toBe(false);
+      assert.strictEqual(result.functions[1].name, 'helper');
+      assert.strictEqual(result.functions[1].isExported, false);
     });
 
     it('should parse arrow functions', () => {
@@ -43,8 +44,8 @@ describe('tsParser', () => {
 
       const result = parseTypeScriptFile(content, 'test.ts');
 
-      expect(result.functions).toHaveLength(2);
-      expect(result.functions[0]).toEqual({
+      assert.strictEqual(result.functions.length, 2);
+      assert.deepStrictEqual(result.functions[0], {
         name: 'multiply',
         isAsync: false,
         parameters: [
@@ -54,8 +55,8 @@ describe('tsParser', () => {
         returnType: 'number',
         isExported: true
       });
-      expect(result.functions[1].name).toBe('divide');
-      expect(result.functions[1].isAsync).toBe(true);
+      assert.strictEqual(result.functions[1].name, 'divide');
+      assert.strictEqual(result.functions[1].isAsync, true);
     });
 
     it('should parse class declarations', () => {
@@ -76,8 +77,8 @@ describe('tsParser', () => {
 
       const result = parseTypeScriptFile(content, 'test.ts');
 
-      expect(result.classes).toHaveLength(1);
-      expect(result.classes[0]).toEqual({
+      assert.strictEqual(result.classes).toHaveLength(1);
+      assert.strictEqual(result.classes[0], {
         name: 'Calculator',
         isExported: true,
         methods: [
@@ -126,15 +127,15 @@ describe('tsParser', () => {
 
       const result = parseTypeScriptFile(content, 'Button.tsx');
 
-      expect(result.isReactFile).toBe(true);
-      expect(result.components).toHaveLength(2);
-      expect(result.components[0]).toEqual({
+      assert.strictEqual(result.isReactFile, true);
+      assert.strictEqual(result.components).toHaveLength(2);
+      assert.strictEqual(result.components[0], {
         name: 'Button',
         isExported: true,
         props: 'Props',
         isDefaultExport: false
       });
-      expect(result.components[1]).toEqual({
+      assert.strictEqual(result.components[1], {
         name: 'Card',
         isExported: true,
         props: '{ children: React.ReactNode }',
@@ -152,22 +153,22 @@ describe('tsParser', () => {
 
       const result = parseTypeScriptFile(content, 'test.ts');
 
-      expect(result.imports).toHaveLength(4);
-      expect(result.imports[0]).toEqual({
+      assert.strictEqual(result.imports).toHaveLength(4);
+      assert.strictEqual(result.imports[0], {
         moduleName: 'react',
         namedImports: ['useState'],
         defaultImport: 'React'
       });
-      expect(result.imports[1]).toEqual({
+      assert.strictEqual(result.imports[1], {
         moduleName: 'fs',
         namedImports: [],
         namespaceImport: 'fs'
       });
-      expect(result.imports[2]).toEqual({
+      assert.strictEqual(result.imports[2], {
         moduleName: 'path',
         namedImports: ['join']
       });
-      expect(result.imports[3]).toEqual({
+      assert.strictEqual(result.imports[3], {
         moduleName: './utils',
         namedImports: [],
         defaultImport: 'utils'
@@ -183,7 +184,7 @@ describe('tsParser', () => {
 
       const result = parseTypeScriptFile(content, 'test.ts');
 
-      expect(result.functions[0].parameters).toEqual([
+      assert.strictEqual(result.functions[0].parameters, [
         { name: 'name', type: 'string', isOptional: false },
         { name: 'greeting', type: 'string', isOptional: true }
       ]);
@@ -195,8 +196,8 @@ describe('tsParser', () => {
       const tsxResult = parseTypeScriptFile(content, 'test.tsx');
       const tsResult = parseTypeScriptFile(content, 'test.ts');
 
-      expect(tsxResult.isReactFile).toBe(true);
-      expect(tsResult.isReactFile).toBe(false);
+      assert.strictEqual(tsxResult.isReactFile, true);
+      assert.strictEqual(tsResult.isReactFile, false);
     });
 
     it('should detect React files by import', () => {
@@ -207,7 +208,7 @@ describe('tsParser', () => {
       
       const result = parseTypeScriptFile(content, 'test.ts');
 
-      expect(result.isReactFile).toBe(true);
+      assert.strictEqual(result.isReactFile, true);
     });
 
     it('should handle export assignments', () => {
@@ -218,8 +219,8 @@ describe('tsParser', () => {
 
       const result = parseTypeScriptFile(content, 'App.tsx');
 
-      expect(result.components).toHaveLength(1);
-      expect(result.components[0]).toEqual({
+      assert.strictEqual(result.components).toHaveLength(1);
+      assert.strictEqual(result.components[0], {
         name: 'App',
         isExported: true,
         isDefaultExport: true,
@@ -230,11 +231,11 @@ describe('tsParser', () => {
     it('should handle empty file', () => {
       const result = parseTypeScriptFile('', 'empty.ts');
 
-      expect(result.functions).toHaveLength(0);
-      expect(result.classes).toHaveLength(0);
-      expect(result.components).toHaveLength(0);
-      expect(result.imports).toHaveLength(0);
-      expect(result.isReactFile).toBe(false);
+      assert.strictEqual(result.functions.length, 0);
+      assert.strictEqual(result.classes).toHaveLength(0);
+      assert.strictEqual(result.components).toHaveLength(0);
+      assert.strictEqual(result.imports).toHaveLength(0);
+      assert.strictEqual(result.isReactFile, false);
     });
   });
 });

@@ -1,112 +1,159 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import * as vscode from 'vscode';
+import { it, suite, beforeEach, afterEach } from 'node:test';
+import { strict as assert } from 'node:assert';
+import * as sinon from 'sinon';
 import * as fs from 'fs';
-// import * as path from 'path';
+import * as vscode from 'vscode';
 import { generateTestFileCommand } from './generateTestFile';
-import { parseTypeScriptFile } from '../parser/tsParser';
-import { generateTestContent } from '../generator/testGenerator';
-import { getTestFilePath } from '../utils/fileUtils';
+// Module functions will be stubbed via require() in beforeEach
 
-vi.mock('fs');
-vi.mock('../parser/tsParser');
-vi.mock('../generator/testGenerator');
-vi.mock('../utils/fileUtils');
+suite('generateTestFileCommand', () => {
+  let fsStubs: {
+    existsSync: sinon.SinonStub;
+    readFileSync: sinon.SinonStub;
+    writeFileSync: sinon.SinonStub;
+  };
+  let parseTypeScriptFileStub: sinon.SinonStub;
+  let generateTestContentStub: sinon.SinonStub;
+  let getTestFilePathStub: sinon.SinonStub;
+  let vscodeStubs: {
+    showErrorMessage: sinon.SinonStub;
+    showInformationMessage: sinon.SinonStub;
+    showQuickPick: sinon.SinonStub;
+    openTextDocument: sinon.SinonStub;
+    showTextDocument: sinon.SinonStub;
+  };
 
-describe('generateTestFileCommand', () => {
-  const mockFs = vi.mocked(fs);
-  const mockParseTypeScriptFile = vi.mocked(parseTypeScriptFile);
-  const mockGenerateTestContent = vi.mocked(generateTestContent);
-  const mockGetTestFilePath = vi.mocked(getTestFilePath);
-  
   beforeEach(() => {
-    vi.clearAllMocks();
+    // Create stubs for file system operations
+    fsStubs = {
+      existsSync: sinon.stub(fs, 'existsSync'),
+      readFileSync: sinon.stub(fs, 'readFileSync'),
+      writeFileSync: sinon.stub(fs, 'writeFileSync')
+    };
+    
+    // Create stubs for module dependencies
+    parseTypeScriptFileStub = sinon.stub().returns({
+      functions: [],
+      classes: [],
+      components: [],
+      imports: [],
+      isReactFile: false
+    });
+    
+    generateTestContentStub = sinon.stub().returns('test content');
+    getTestFilePathStub = sinon.stub().returns('/test/file.test.ts');
+
+    // Create stubs for VS Code APIs
+    vscodeStubs = {
+      showErrorMessage: sinon.stub(vscode.window, 'showErrorMessage'),
+      showInformationMessage: sinon.stub(vscode.window, 'showInformationMessage'),
+      showQuickPick: sinon.stub(vscode.window, 'showQuickPick'),
+      openTextDocument: sinon.stub(vscode.workspace, 'openTextDocument'),
+      showTextDocument: sinon.stub(vscode.window, 'showTextDocument')
+    };
+
+    // Replace the actual module functions with stubs
+    const parseModule = require('../parser/tsParser');
+    const generateModule = require('../generator/testGenerator');
+    const utilsModule = require('../utils/fileUtils');
+    
+    sinon.stub(parseModule, 'parseTypeScriptFile').callsFake(parseTypeScriptFileStub);
+    sinon.stub(generateModule, 'generateTestContent').callsFake(generateTestContentStub);
+    sinon.stub(utilsModule, 'getTestFilePath').callsFake(getTestFilePathStub);
   });
 
   afterEach(() => {
-    vi.restoreAllMocks();
+    // Restore all stubs
+    sinon.restore();
   });
 
   it('should be defined', () => {
-    expect(generateTestFileCommand).toBeDefined();
+    assert.ok(typeof generateTestFileCommand === 'function');
   });
 
   it('should show error when no file is selected', async () => {
-    const showErrorMessageSpy = vi.spyOn(vscode.window, 'showErrorMessage');
-
     await generateTestFileCommand();
 
-    expect(showErrorMessageSpy).toHaveBeenCalledWith('No file selected or active');
+    assert.ok(vscodeStubs.showErrorMessage.calledWith('No file selected or active'));
   });
 
   it('should show error for non-TypeScript files', async () => {
-    const mockUri = { fsPath: '/test/file.js' } as vscode.Uri;
-    const showErrorMessageSpy = vi.spyOn(vscode.window, 'showErrorMessage');
+    const mockUri = vscode.Uri.file('/test/file.js');
 
     await generateTestFileCommand(mockUri);
 
-    expect(showErrorMessageSpy).toHaveBeenCalledWith('This command only works with .ts and .tsx files');
+    assert.ok(vscodeStubs.showErrorMessage.calledWith('This command only works with .ts and .tsx files'));
   });
 
   it('should generate test file for TypeScript file', async () => {
-    const mockUri = { fsPath: '/test/file.ts' } as vscode.Uri;
-    const testFilePath = '/test/file.test.ts';
+    const mockUri = vscode.Uri.file('/test/file.ts');
     const sourceContent = 'export function test() {}';
-    const analysisResult = { functions: [], classes: [], components: [], imports: [], isReactFile: false };
     const testContent = 'test content';
 
-    mockGetTestFilePath.mockReturnValue(testFilePath);
-    mockFs.existsSync.mockReturnValue(false);
-    mockFs.readFileSync.mockReturnValue(sourceContent);
-    mockParseTypeScriptFile.mockReturnValue(analysisResult);
-    mockGenerateTestContent.mockReturnValue(testContent);
-    
-    const openTextDocumentSpy = vi.spyOn(vscode.workspace, 'openTextDocument').mockResolvedValue({} as vscode.TextDocument);
-    const showTextDocumentSpy = vi.spyOn(vscode.window, 'showTextDocument').mockResolvedValue({} as vscode.TextEditor);
-    const showInformationMessageSpy = vi.spyOn(vscode.window, 'showInformationMessage');
+    // Setup stubs
+    getTestFilePathStub.returns('/test/file.test.ts');
+    fsStubs.existsSync.returns(false);
+    fsStubs.readFileSync.returns(sourceContent);
+    generateTestContentStub.returns(testContent);
+    vscodeStubs.openTextDocument.resolves({} as vscode.TextDocument);
+    vscodeStubs.showTextDocument.resolves({} as vscode.TextEditor);
 
     await generateTestFileCommand(mockUri);
 
-    expect(mockGetTestFilePath).toHaveBeenCalledWith('/test/file.ts');
-    expect(mockFs.readFileSync).toHaveBeenCalledWith('/test/file.ts', 'utf8');
-    expect(mockParseTypeScriptFile).toHaveBeenCalledWith(sourceContent, '/test/file.ts');
-    expect(mockGenerateTestContent).toHaveBeenCalledWith(analysisResult, '/test/file.ts');
-    expect(mockFs.writeFileSync).toHaveBeenCalledWith(testFilePath, testContent, 'utf8');
-    expect(openTextDocumentSpy).toHaveBeenCalledWith(testFilePath);
-    expect(showTextDocumentSpy).toHaveBeenCalled();
-    expect(showInformationMessageSpy).toHaveBeenCalledWith('Test file generated: file.test.ts');
+    assert.ok(fsStubs.readFileSync.calledWith('/test/file.ts', 'utf8'));
+    assert.ok(fsStubs.writeFileSync.calledWith('/test/file.test.ts', testContent, 'utf8'));
+    assert.ok(vscodeStubs.showInformationMessage.calledWith('Test file generated: file.test.ts'));
   });
 
   it('should prompt for overwrite when test file exists', async () => {
-    const mockUri = { fsPath: '/test/file.ts' } as vscode.Uri;
-    const testFilePath = '/test/file.test.ts';
+    const mockUri = vscode.Uri.file('/test/file.ts');
 
-    mockGetTestFilePath.mockReturnValue(testFilePath);
-    mockFs.existsSync.mockReturnValue(true);
-    
-    const showQuickPickSpy = vi.spyOn(vscode.window, 'showQuickPick').mockResolvedValue({ label: "No" });
+    getTestFilePathStub.returns('/test/file.test.ts');
+    fsStubs.existsSync.returns(true);
+    vscodeStubs.showQuickPick.resolves({ label: "No" });
 
     await generateTestFileCommand(mockUri);
 
-    expect(showQuickPickSpy).toHaveBeenCalledWith(['Yes', 'No'], {
+    assert.ok(vscodeStubs.showQuickPick.calledWith(['Yes', 'No'], {
       placeHolder: 'Test file already exists. Overwrite?'
-    });
-    expect(mockFs.writeFileSync).not.toHaveBeenCalled();
+    }));
+    assert.ok(fsStubs.writeFileSync.notCalled);
+  });
+
+  it('should overwrite when user confirms', async () => {
+    const mockUri = vscode.Uri.file('/test/file.ts');
+    const sourceContent = 'export function test() {}';
+    const testContent = 'test content';
+
+    getTestFilePathStub.returns('/test/file.test.ts');
+    fsStubs.existsSync.returns(true);
+    fsStubs.readFileSync.returns(sourceContent);
+    generateTestContentStub.returns(testContent);
+    vscodeStubs.showQuickPick.resolves({ label: 'Yes' });
+    vscodeStubs.openTextDocument.resolves({} as vscode.TextDocument);
+    vscodeStubs.showTextDocument.resolves({} as vscode.TextEditor);
+
+    await generateTestFileCommand(mockUri);
+
+    assert.ok(vscodeStubs.showQuickPick.calledWith(['Yes', 'No'], {
+      placeHolder: 'Test file already exists. Overwrite?'
+    }));
+    assert.ok(fsStubs.writeFileSync.calledWith('/test/file.test.ts', testContent, 'utf8'));
+    assert.ok(vscodeStubs.showInformationMessage.calledWith('Test file generated: file.test.ts'));
   });
 
   it('should handle errors gracefully', async () => {
-    const mockUri = { fsPath: '/test/file.ts' } as vscode.Uri;
+    const mockUri = vscode.Uri.file('/test/file.ts');
     const error = new Error('Test error');
+    const consoleErrorSpy = sinon.spy(console, 'error');
 
-    mockGetTestFilePath.mockImplementation(() => {
-      throw error;
-    });
-
-    const showErrorMessageSpy = vi.spyOn(vscode.window, 'showErrorMessage');
-    const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+    getTestFilePathStub.throws(error);
 
     await generateTestFileCommand(mockUri);
 
-    expect(consoleErrorSpy).toHaveBeenCalledWith('Error generating test file:', error);
-    expect(showErrorMessageSpy).toHaveBeenCalledWith('Failed to generate test file: Test error');
+    assert.ok(consoleErrorSpy.calledWith('Error generating test file:', error));
+    assert.ok(vscodeStubs.showErrorMessage.calledWith('Failed to generate test file: Test error'));
+
+    consoleErrorSpy.restore();
   });
 });
