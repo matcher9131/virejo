@@ -1,4 +1,5 @@
 import * as assert from 'assert';
+import { beforeEach, afterEach } from "mocha";
 import { calculateSum, fetchUserData, UserManager, formatName } from './sample';
 
 suite('Integration Tests', () => {

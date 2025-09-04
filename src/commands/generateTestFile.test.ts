@@ -1,4 +1,5 @@
 import * as assert from 'assert';
+import { beforeEach, afterEach } from "mocha";
 import * as sinon from 'sinon';
 import * as fs from 'fs';
 import * as vscode from 'vscode';
