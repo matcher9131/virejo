@@ -164,7 +164,7 @@ suite('testGenerator', () => {
 
       const result = generateTestContent(analysis, '/mixed.tsx');
 
-      assert.ok(result.includes("import Widget, { helper, Service } from './mixed';"));
+      assert.ok(result.includes("import { helper, Service, Widget } from './mixed';"));
       assert.ok(result.includes("describe('mixed', () => {"));
       assert.ok(result.includes("describe('Service', () => {"));
       assert.ok(result.includes("describe('Widget', () => {"));
