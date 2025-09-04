@@ -1,4 +1,5 @@
 import * as assert from 'assert';
+import * as path from 'path';
 import { getTestFilePath, isTypeScriptFile, isReactFile } from './fileUtils';
 
 suite('fileUtils', () => {
@@ -8,18 +9,18 @@ suite('fileUtils', () => {
     });
 
     test('should generate test file path for .ts file', () => {
-      const result = getTestFilePath('/src/utils.ts');
-      assert.strictEqual(result, '/src/utils.test.ts');
+      const result = getTestFilePath(path.join(path.sep, 'src', 'utils.ts'));
+      assert.strictEqual(result, path.join(path.sep, 'src', 'utils.test.ts'));
     });
 
     test('should generate test file path for .tsx file', () => {
-      const result = getTestFilePath('/src/Component.tsx');
-      assert.strictEqual(result, '/src/Component.test.tsx');
+      const result = getTestFilePath(path.join(path.sep, 'src', 'Component.tsx'));
+      assert.strictEqual(result, path.join(path.sep, 'src', 'Component.test.tsx'));
     });
 
     test('should handle nested directory paths', () => {
-      const result = getTestFilePath('/src/components/Button.tsx');
-      assert.strictEqual(result, '/src/components/Button.test.tsx');
+      const result = getTestFilePath(path.join(path.sep, 'src', 'components', 'Button.tsx'));
+      assert.strictEqual(result, path.join(path.sep, 'src', 'components', 'Button.test.tsx'));
     });
 
     test('should handle files without directory', () => {
@@ -34,20 +35,20 @@ suite('fileUtils', () => {
     });
 
     test('should return true for .ts files', () => {
-      assert.strictEqual(isTypeScriptFile('/path/file.ts'), true);
+      assert.strictEqual(isTypeScriptFile(path.join(path.sep, 'path', 'file.ts')), true);
     });
 
     test('should return true for .tsx files', () => {
-      assert.strictEqual(isTypeScriptFile('/path/Component.tsx'), true);
+      assert.strictEqual(isTypeScriptFile(path.join(path.sep, 'path', 'Component.tsx')), true);
     });
 
     test('should return false for .js files', () => {
-      assert.strictEqual(isTypeScriptFile('/path/file.js'), false);
+      assert.strictEqual(isTypeScriptFile(path.join(path.sep, 'path', 'file.js')), false);
     });
 
     test('should return false for other file types', () => {
-      assert.strictEqual(isTypeScriptFile('/path/file.json'), false);
-      assert.strictEqual(isTypeScriptFile('/path/file.md'), false);
+      assert.strictEqual(isTypeScriptFile(path.join(path.sep, 'path', 'file.json')), false);
+      assert.strictEqual(isTypeScriptFile(path.join(path.sep, 'path', 'file.md')), false);
     });
   });
 
@@ -57,16 +58,16 @@ suite('fileUtils', () => {
     });
 
     test('should return true for .tsx files', () => {
-      assert.strictEqual(isReactFile('/path/Component.tsx'), true);
+      assert.strictEqual(isReactFile(path.join(path.sep, 'path', 'Component.tsx')), true);
     });
 
     test('should return false for .ts files', () => {
-      assert.strictEqual(isReactFile('/path/utils.ts'), false);
+      assert.strictEqual(isReactFile(path.join(path.sep, 'path', 'utils.ts')), false);
     });
 
     test('should return false for other file types', () => {
-      assert.strictEqual(isReactFile('/path/file.js'), false);
-      assert.strictEqual(isReactFile('/path/file.json'), false);
+      assert.strictEqual(isReactFile(path.join(path.sep, 'path', 'file.js')), false);
+      assert.strictEqual(isReactFile(path.join(path.sep, 'path', 'file.json')), false);
     });
   });
 });
