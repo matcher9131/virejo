@@ -1,14 +1,15 @@
-import { it, suite, beforeEach, afterEach } from 'node:test';
-import { strict as assert } from 'node:assert';
+import * as assert from 'assert';
 import * as sinon from 'sinon';
 import * as fs from 'fs';
 import * as vscode from 'vscode';
 import { generateTestFileCommand } from './generateTestFile';
-// Module functions will be stubbed via require() in beforeEach
+import * as parseModule from '../parser/tsParser';
+import * as generateModule from '../generator/testGenerator';
+import * as utilsModule from '../utils/fileUtils';
 
 suite('generateTestFileCommand', () => {
   let fsStubs: {
-    existsSync: sinon.SinonStub;
+    existsSync: sinon.SinonStub; 
     readFileSync: sinon.SinonStub;
     writeFileSync: sinon.SinonStub;
   };
@@ -26,9 +27,9 @@ suite('generateTestFileCommand', () => {
   beforeEach(() => {
     // Create stubs for file system operations
     fsStubs = {
-      existsSync: sinon.stub(fs, 'existsSync'),
-      readFileSync: sinon.stub(fs, 'readFileSync'),
-      writeFileSync: sinon.stub(fs, 'writeFileSync')
+      existsSync: sinon.stub(fs, 'existsSync'), 
+      readFileSync: sinon.stub(fs, 'readFileSync'), 
+      writeFileSync: sinon.stub(fs, 'writeFileSync') 
     };
     
     // Create stubs for module dependencies
@@ -40,26 +41,22 @@ suite('generateTestFileCommand', () => {
       isReactFile: false
     });
     
-    generateTestContentStub = sinon.stub().returns('test content');
-    getTestFilePathStub = sinon.stub().returns('/test/file.test.ts');
+    generateTestContentStub = sinon.stub().returns('test content'); 
+    getTestFilePathStub = sinon.stub().returns('/test/file.test.ts'); 
 
     // Create stubs for VS Code APIs
     vscodeStubs = {
-      showErrorMessage: sinon.stub(vscode.window, 'showErrorMessage'),
-      showInformationMessage: sinon.stub(vscode.window, 'showInformationMessage'),
-      showQuickPick: sinon.stub(vscode.window, 'showQuickPick'),
-      openTextDocument: sinon.stub(vscode.workspace, 'openTextDocument'),
-      showTextDocument: sinon.stub(vscode.window, 'showTextDocument')
+      showErrorMessage: sinon.stub(vscode.window, 'showErrorMessage'), 
+      showInformationMessage: sinon.stub(vscode.window, 'showInformationMessage'), 
+      showQuickPick: sinon.stub(vscode.window, 'showQuickPick'), 
+      openTextDocument: sinon.stub(vscode.workspace, 'openTextDocument'), 
+      showTextDocument: sinon.stub(vscode.window, 'showTextDocument') 
     };
 
     // Replace the actual module functions with stubs
-    const parseModule = require('../parser/tsParser');
-    const generateModule = require('../generator/testGenerator');
-    const utilsModule = require('../utils/fileUtils');
-    
-    sinon.stub(parseModule, 'parseTypeScriptFile').callsFake(parseTypeScriptFileStub);
-    sinon.stub(generateModule, 'generateTestContent').callsFake(generateTestContentStub);
-    sinon.stub(utilsModule, 'getTestFilePath').callsFake(getTestFilePathStub);
+    sinon.stub(parseModule, 'parseTypeScriptFile').callsFake(parseTypeScriptFileStub); 
+    sinon.stub(generateModule, 'generateTestContent').callsFake(generateTestContentStub); 
+    sinon.stub(utilsModule, 'getTestFilePath').callsFake(getTestFilePathStub); 
   });
 
   afterEach(() => {
@@ -67,17 +64,17 @@ suite('generateTestFileCommand', () => {
     sinon.restore();
   });
 
-  it('should be defined', () => {
+  test('should be defined', () => {
     assert.ok(typeof generateTestFileCommand === 'function');
   });
 
-  it('should show error when no file is selected', async () => {
+  test('should show error when no file is selected', async () => {
     await generateTestFileCommand();
 
     assert.ok(vscodeStubs.showErrorMessage.calledWith('No file selected or active'));
   });
 
-  it('should show error for non-TypeScript files', async () => {
+  test('should show error for non-TypeScript files', async () => {
     const mockUri = vscode.Uri.file('/test/file.js');
 
     await generateTestFileCommand(mockUri);
@@ -85,7 +82,7 @@ suite('generateTestFileCommand', () => {
     assert.ok(vscodeStubs.showErrorMessage.calledWith('This command only works with .ts and .tsx files'));
   });
 
-  it('should generate test file for TypeScript file', async () => {
+  test('should generate test file for TypeScript file', async () => {
     const mockUri = vscode.Uri.file('/test/file.ts');
     const sourceContent = 'export function test() {}';
     const testContent = 'test content';
@@ -105,7 +102,7 @@ suite('generateTestFileCommand', () => {
     assert.ok(vscodeStubs.showInformationMessage.calledWith('Test file generated: file.test.ts'));
   });
 
-  it('should prompt for overwrite when test file exists', async () => {
+  test('should prompt for overwrite when test file exists', async () => {
     const mockUri = vscode.Uri.file('/test/file.ts');
 
     getTestFilePathStub.returns('/test/file.test.ts');
@@ -120,7 +117,7 @@ suite('generateTestFileCommand', () => {
     assert.ok(fsStubs.writeFileSync.notCalled);
   });
 
-  it('should overwrite when user confirms', async () => {
+  test('should overwrite when user confirms', async () => {
     const mockUri = vscode.Uri.file('/test/file.ts');
     const sourceContent = 'export function test() {}';
     const testContent = 'test content';
@@ -142,7 +139,7 @@ suite('generateTestFileCommand', () => {
     assert.ok(vscodeStubs.showInformationMessage.calledWith('Test file generated: file.test.ts'));
   });
 
-  it('should handle errors gracefully', async () => {
+  test('should handle errors gracefully', async () => {
     const mockUri = vscode.Uri.file('/test/file.ts');
     const error = new Error('Test error');
     const consoleErrorSpy = sinon.spy(console, 'error');

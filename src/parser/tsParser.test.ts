@@ -1,14 +1,13 @@
-import { it, suite } from 'node:test';
-import { strict as assert } from 'node:assert';
+import * as assert from 'assert';
 import { parseTypeScriptFile } from './tsParser';
 
 suite('tsParser', () => {
   suite('parseTypeScriptFile', () => {
-    it('should be defined', () => {
+    test('should be defined', () => {
       assert.ok(typeof parseTypeScriptFile === 'function');
     });
 
-    it('should parse function declarations', () => {
+    test('should parse function declarations', () => {
       const content = `
         export function add(a: number, b: number): number {
           return a + b;
@@ -36,7 +35,7 @@ suite('tsParser', () => {
       assert.strictEqual(result.functions[1].isExported, false);
     });
 
-    it('should parse arrow functions', () => {
+    test('should parse arrow functions', () => {
       const content = `
         export const multiply = (a: number, b: number): number => a * b;
         const divide = async (a: number, b: number): Promise<number> => a / b;
@@ -59,7 +58,7 @@ suite('tsParser', () => {
       assert.strictEqual(result.functions[1].isAsync, true);
     });
 
-    it('should parse class declarations', () => {
+    test('should parse class declarations', () => {
       const content = `
         export class Calculator {
           private result: number = 0;
@@ -77,7 +76,7 @@ suite('tsParser', () => {
 
       const result = parseTypeScriptFile(content, 'test.ts');
 
-      assert.strictEqual(result.classes).toHaveLength(1);
+      assert.strictEqual(result.classes.length, 1);
       assert.strictEqual(result.classes[0], {
         name: 'Calculator',
         isExported: true,
@@ -107,7 +106,7 @@ suite('tsParser', () => {
       });
     });
 
-    it('should parse React components', () => {
+    test('should parse React components', () => {
       const content = `
         import React from 'react';
         
@@ -128,7 +127,7 @@ suite('tsParser', () => {
       const result = parseTypeScriptFile(content, 'Button.tsx');
 
       assert.strictEqual(result.isReactFile, true);
-      assert.strictEqual(result.components).toHaveLength(2);
+      assert.strictEqual(result.components.length, 2);
       assert.strictEqual(result.components[0], {
         name: 'Button',
         isExported: true,
@@ -143,7 +142,7 @@ suite('tsParser', () => {
       });
     });
 
-    it('should parse import declarations', () => {
+    test('should parse import declarations', () => {
       const content = `
         import React, { useState } from 'react';
         import * as fs from 'fs';
@@ -153,7 +152,7 @@ suite('tsParser', () => {
 
       const result = parseTypeScriptFile(content, 'test.ts');
 
-      assert.strictEqual(result.imports).toHaveLength(4);
+      assert.strictEqual(result.imports.length, 4);
       assert.strictEqual(result.imports[0], {
         moduleName: 'react',
         namedImports: ['useState'],
@@ -175,7 +174,7 @@ suite('tsParser', () => {
       });
     });
 
-    it('should handle optional parameters', () => {
+    test('should handle optional parameters', () => {
       const content = `
         export function greet(name: string, greeting?: string): string {
           return \`\${greeting || 'Hello'}, \${name}!\`;
@@ -190,7 +189,7 @@ suite('tsParser', () => {
       ]);
     });
 
-    it('should detect React files by extension', () => {
+    test('should detect React files by extension', () => {
       const content = 'const value = 42;';
       
       const tsxResult = parseTypeScriptFile(content, 'test.tsx');
@@ -200,7 +199,7 @@ suite('tsParser', () => {
       assert.strictEqual(tsResult.isReactFile, false);
     });
 
-    it('should detect React files by import', () => {
+    test('should detect React files by import', () => {
       const content = `
         import React from 'react';
         export const value = 42;
@@ -211,7 +210,7 @@ suite('tsParser', () => {
       assert.strictEqual(result.isReactFile, true);
     });
 
-    it('should handle export assignments', () => {
+    test('should handle export assignments', () => {
       const content = `
         const App = () => <div>Hello</div>;
         export default App;
@@ -219,7 +218,7 @@ suite('tsParser', () => {
 
       const result = parseTypeScriptFile(content, 'App.tsx');
 
-      assert.strictEqual(result.components).toHaveLength(1);
+      assert.strictEqual(result.components.length,1 );
       assert.strictEqual(result.components[0], {
         name: 'App',
         isExported: true,
@@ -228,13 +227,13 @@ suite('tsParser', () => {
       });
     });
 
-    it('should handle empty file', () => {
+    test('should handle empty file', () => {
       const result = parseTypeScriptFile('', 'empty.ts');
 
       assert.strictEqual(result.functions.length, 0);
-      assert.strictEqual(result.classes).toHaveLength(0);
-      assert.strictEqual(result.components).toHaveLength(0);
-      assert.strictEqual(result.imports).toHaveLength(0);
+      assert.strictEqual(result.classes.length, 0)
+      assert.strictEqual(result.components.length, 0);
+      assert.strictEqual(result.imports.length, 0);
       assert.strictEqual(result.isReactFile, false);
     });
   });

@@ -1,15 +1,14 @@
-import { it, suite } from 'node:test';
-import { strict as assert } from 'node:assert';
+import * as assert from 'assert';
 import { generateTestContent } from './testGenerator';
 import { AnalysisResult } from '../parser/tsParser';
 
-void suite('testGenerator', () => {
-  void suite('generateTestContent', () => {
-    void it('should be defined', () => {
+suite('testGenerator', () => {
+  suite('generateTestContent', () => {
+    test('should be defined', () => {
       assert.ok(typeof generateTestContent === 'function');
     });
 
-    void it('should generate basic test content for functions', () => {
+    test('should generate basic test content for functions', () => {
       const analysis: AnalysisResult = {
         functions: [{
           name: 'add',
@@ -36,7 +35,7 @@ void suite('testGenerator', () => {
       assert.ok(result.includes("expect(add).toBeDefined();"));
     });
 
-    void it('should generate test content for React components', () => {
+    test('should generate test content for React components', () => {
       const analysis: AnalysisResult = {
         functions: [],
         classes: [],
@@ -61,7 +60,7 @@ void suite('testGenerator', () => {
       assert.ok(result.includes("should match snapshot"));
     });
 
-    void it('should generate test content for classes', () => {
+    test('should generate test content for classes', () => {
       const analysis: AnalysisResult = {
         functions: [],
         classes: [{
@@ -99,7 +98,7 @@ void suite('testGenerator', () => {
       assert.ok(result.includes("describe('add', () => {"));
     });
 
-    void it('should handle async functions', () => {
+    test('should handle async functions', () => {
       const analysis: AnalysisResult = {
         functions: [{
           name: 'fetchData',
@@ -120,7 +119,7 @@ void suite('testGenerator', () => {
       assert.ok(result.includes("const result = await fetchData();"));
     });
 
-    void it('should handle default export React components', () => {
+    test('should handle default export React components', () => {
       const analysis: AnalysisResult = {
         functions: [],
         classes: [],
@@ -140,7 +139,7 @@ void suite('testGenerator', () => {
       assert.ok(result.includes("render(<App />);"));
     });
 
-    void it('should handle mixed exports', () => {
+    test('should handle mixed exports', () => {
       const analysis: AnalysisResult = {
         functions: [{
           name: 'helper',
