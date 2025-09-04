@@ -166,6 +166,7 @@ const handleVariableStatement = (node: ts.VariableStatement, result: AnalysisRes
         // Check for arrow functions
         if (ts.isArrowFunction(declaration.initializer)) {
             const arrowFunction = declaration.initializer;
+            const typeAnnotation = declaration.type?.getText();
             const functionInfo: FunctionInfo = {
                 name,
                 isAsync: !!(arrowFunction.modifiers?.some(mod => mod.kind === ts.SyntaxKind.AsyncKeyword)),
@@ -179,11 +180,20 @@ const handleVariableStatement = (node: ts.VariableStatement, result: AnalysisRes
             };
 
             // Check if it's a React component
-            if (result.isReactFile && isReactComponentArrow(arrowFunction)) {
+            if (result.isReactFile && isReactComponentArrow(arrowFunction, name, typeAnnotation)) {
+                // Extract props from React.FC<Props> type annotation
+                let props = functionInfo.parameters[0]?.type;
+                if (!props && typeAnnotation?.includes('React.FC<')) {
+                    const match = typeAnnotation.match(/React\.FC<([^>]+)>/);
+                    if (match) {
+                        props = match[1];
+                    }
+                }
+                
                 const componentInfo: ComponentInfo = {
                     name,
                     isExported,
-                    props: functionInfo.parameters[0]?.type,
+                    props,
                     isDefaultExport: false
                 };
                 result.components.push(componentInfo);
@@ -241,6 +251,7 @@ const handleExportAssignment = (node: ts.ExportAssignment, result: AnalysisResul
         const component = result.components.find(c => c.name === name);
         if (component) {
             component.isDefaultExport = true;
+            component.isExported = true; // Default exports are exported
         }
         
         const func = result.functions.find(f => f.name === name);
@@ -253,6 +264,9 @@ const handleExportAssignment = (node: ts.ExportAssignment, result: AnalysisResul
                 props: func.parameters[0]?.type
             });
             result.functions = result.functions.filter(f => f.name !== name);
+        } else if (func) {
+            // Update function export status
+            func.isExported = true;
         }
     }
 }
@@ -269,8 +283,18 @@ const isReactComponent = (node: ts.FunctionDeclaration): boolean => {
     return !!(returnType?.includes('JSX') || returnType?.includes('ReactElement') || returnType?.includes('React.FC'));
 }
 
-const isReactComponentArrow = (node: ts.ArrowFunction): boolean => {
+const isReactComponentArrow = (arrowFunction: ts.ArrowFunction, name?: string, typeAnnotation?: string): boolean => {
+    // Check if variable has React.FC type annotation
+    if (typeAnnotation?.includes('React.FC') || typeAnnotation?.includes('ReactFC')) {
+        return true;
+    }
+    
+    // Check if component name starts with uppercase (React component convention)
+    if (name && name[0] === name[0].toUpperCase()) {
+        return true;
+    }
+
     // Check return type or if it returns JSX
-    const returnType = node.type?.getText();
+    const returnType = arrowFunction.type?.getText();
     return !!(returnType?.includes('JSX') || returnType?.includes('ReactElement') || returnType?.includes('React.FC'));
 }

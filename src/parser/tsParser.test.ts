@@ -77,7 +77,7 @@ suite('tsParser', () => {
       const result = parseTypeScriptFile(content, 'test.ts');
 
       assert.strictEqual(result.classes.length, 1);
-      assert.strictEqual(result.classes[0], {
+      assert.deepStrictEqual(result.classes[0], {
         name: 'Calculator',
         isExported: true,
         methods: [
@@ -128,13 +128,13 @@ suite('tsParser', () => {
 
       assert.strictEqual(result.isReactFile, true);
       assert.strictEqual(result.components.length, 2);
-      assert.strictEqual(result.components[0], {
+      assert.deepStrictEqual(result.components[0], {
         name: 'Button',
         isExported: true,
         props: 'Props',
         isDefaultExport: false
       });
-      assert.strictEqual(result.components[1], {
+      assert.deepStrictEqual(result.components[1], {
         name: 'Card',
         isExported: true,
         props: '{ children: React.ReactNode }',
@@ -153,21 +153,21 @@ suite('tsParser', () => {
       const result = parseTypeScriptFile(content, 'test.ts');
 
       assert.strictEqual(result.imports.length, 4);
-      assert.strictEqual(result.imports[0], {
+      assert.deepStrictEqual(result.imports[0], {
         moduleName: 'react',
         namedImports: ['useState'],
         defaultImport: 'React'
       });
-      assert.strictEqual(result.imports[1], {
+      assert.deepStrictEqual(result.imports[1], {
         moduleName: 'fs',
         namedImports: [],
         namespaceImport: 'fs'
       });
-      assert.strictEqual(result.imports[2], {
+      assert.deepStrictEqual(result.imports[2], {
         moduleName: 'path',
         namedImports: ['join']
       });
-      assert.strictEqual(result.imports[3], {
+      assert.deepStrictEqual(result.imports[3], {
         moduleName: './utils',
         namedImports: [],
         defaultImport: 'utils'
@@ -183,7 +183,7 @@ suite('tsParser', () => {
 
       const result = parseTypeScriptFile(content, 'test.ts');
 
-      assert.strictEqual(result.functions[0].parameters, [
+      assert.deepStrictEqual(result.functions[0].parameters, [
         { name: 'name', type: 'string', isOptional: false },
         { name: 'greeting', type: 'string', isOptional: true }
       ]);
@@ -219,7 +219,7 @@ suite('tsParser', () => {
       const result = parseTypeScriptFile(content, 'App.tsx');
 
       assert.strictEqual(result.components.length,1 );
-      assert.strictEqual(result.components[0], {
+      assert.deepStrictEqual(result.components[0], {
         name: 'App',
         isExported: true,
         isDefaultExport: true,
