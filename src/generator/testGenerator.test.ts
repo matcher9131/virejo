@@ -26,7 +26,7 @@ suite('testGenerator', () => {
         isReactFile: false
       };
 
-      const result = generateTestContent(analysis, '/test/math.ts');
+      const result = generateTestContent(analysis, '/test/math.ts', 'export function add(a: number, b: number): number { return a + b; }');
 
       assert.ok(result.includes("import { describe, it, expect } from 'vitest';"));
       assert.ok(result.includes("import { add } from './math';"));
@@ -49,7 +49,7 @@ suite('testGenerator', () => {
         isReactFile: true
       };
 
-      const result = generateTestContent(analysis, '/components/Button.tsx');
+      const result = generateTestContent(analysis, '/components/Button.tsx', 'import React from "react"; export const Button = ({ label }) => <button>{label}</button>;');
 
       assert.ok(result.includes("import { describe, it, expect } from 'vitest';"));
       assert.ok(result.includes("import { render, screen } from '@testing-library/react';"));
@@ -87,7 +87,7 @@ suite('testGenerator', () => {
         isReactFile: false
       };
 
-      const result = generateTestContent(analysis, '/utils/Calculator.ts');
+      const result = generateTestContent(analysis, '/utils/Calculator.ts', 'export class Calculator { add(a: number, b: number): number { return a + b; } }');
 
       assert.ok(result.includes("import { describe, it, expect } from 'vitest';"));
       assert.ok(result.includes("import { Calculator } from './Calculator';"));
@@ -113,7 +113,7 @@ suite('testGenerator', () => {
         isReactFile: false
       };
 
-      const result = generateTestContent(analysis, '/api/client.ts');
+      const result = generateTestContent(analysis, '/api/client.ts', 'export async function fetchData(): Promise<string> { return "data"; }');
 
       assert.ok(result.includes("it('should execute without parameters', async () => {"));
       assert.ok(result.includes("const result = await fetchData();"));
@@ -133,7 +133,7 @@ suite('testGenerator', () => {
         isReactFile: true
       };
 
-      const result = generateTestContent(analysis, '/App.tsx');
+      const result = generateTestContent(analysis, '/App.tsx', 'import React from "react"; const App = () => <div>App</div>; export default App;');
 
       assert.ok(result.includes("import App from './App';"));
       assert.ok(result.includes("render(<App />);"));
@@ -162,7 +162,7 @@ suite('testGenerator', () => {
         isReactFile: true
       };
 
-      const result = generateTestContent(analysis, '/mixed.tsx');
+      const result = generateTestContent(analysis, '/mixed.tsx', 'import React from "react"; export function helper() {} export class Service {} export const Widget = () => <div></div>;');
 
       assert.ok(result.includes("import { helper, Service, Widget } from './mixed';"));
       assert.ok(result.includes("describe('mixed', () => {"));

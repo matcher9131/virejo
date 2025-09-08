@@ -43,7 +43,7 @@ export async function generateTestFileCommand(uri?: vscode.Uri) {
         const analysisResult = parseTypeScriptFile(sourceContent, filePath);
 
         // Generate test content
-        const testContent = generateTestContent(analysisResult, filePath);
+        const testContent = generateTestContent(analysisResult, filePath, sourceContent);
 
         // Write test file
         fs.writeFileSync(testFilePath, testContent, 'utf8');

@@ -1,18 +1,22 @@
 import * as path from 'path';
 import { AnalysisResult, FunctionInfo, ClassInfo, ComponentInfo } from '../parser/tsParser';
+import { determineMockingStrategy, generateMocksForStrategy } from './mockGenerator';
 
-export const generateTestContent = (analysis: AnalysisResult, sourceFilePath: string): string => {
+export const generateTestContent = (analysis: AnalysisResult, sourceFilePath: string, sourceContent: string): string => {
     const sourceFileName = path.basename(sourceFilePath, path.extname(sourceFilePath));
     const relativePath = `./${sourceFileName}`;
     
     const lines: string[] = [];
     
-    // Add Vitest imports
-    lines.push("import { describe, it, expect } from 'vitest';");
+    // Determine mocking strategy
+    const mockingStrategy = determineMockingStrategy(sourceFilePath);
+    const mockResult = generateMocksForStrategy(mockingStrategy, analysis.imports, sourceContent);
     
-    // Add React testing imports for TSX files
-    if (analysis.isReactFile && analysis.components.length > 0) {
-        lines.push("import { render, screen } from '@testing-library/react';");
+    // Add Vitest imports with vi if mocks are needed
+    if (mockResult.mockNames.length > 0) {
+        lines.push("import { describe, it, expect, vi } from 'vitest';");
+    } else {
+        lines.push("import { describe, it, expect } from 'vitest';");
     }
     
     // Add source file imports
@@ -22,6 +26,31 @@ export const generateTestContent = (analysis: AnalysisResult, sourceFilePath: st
     }
     
     lines.push('');
+    
+    // Add mock declarations if any
+    if (mockResult.hoistedDeclarations.length > 0) {
+        lines.push('const {');
+        lines.push('    ' + mockResult.mockNames.join(',\n    '));
+        lines.push('} = vi.hoisted(() => {');
+        lines.push(...mockResult.hoistedDeclarations);
+        lines.push('    return {');
+        lines.push('        ' + mockResult.mockNames.join(',\n        '));
+        lines.push('    };');
+        lines.push('});');
+        lines.push('');
+        
+        // Add vi.mock calls
+        mockResult.viMockCalls.forEach(mockCall => {
+            lines.push(mockCall);
+        });
+        lines.push('');
+    }
+    
+    // Add React testing imports for TSX files
+    if (analysis.isReactFile && analysis.components.length > 0) {
+        lines.push("import { render, screen } from '@testing-library/react';");
+        lines.push('');
+    }
     
     // Generate tests for functions
     if (analysis.functions.length > 0) {
