@@ -77,6 +77,9 @@ npm run lint
 - React functional components (TSX)
 - Interface/type definitions for test data generation
 
+**Automatically Mocking:**
+- See .claude/mocking_design.md
+
 ## Development Workflow
 
 1. Start with basic extension scaffold (`yo code` generator)
