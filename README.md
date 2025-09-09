@@ -162,7 +162,7 @@ vi.mock("./helpers", () => ({
 
 ## Requirements
 
-- VS Code 1.74.0 or higher
+- VS Code 1.93.0 or higher
 - TypeScript files (.ts, .tsx)
 - Vitest testing framework (for running the generated tests)
 
