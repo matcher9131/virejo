@@ -3,7 +3,7 @@
   "displayName": "Virejo - Test File Generator",
   "description": "Automatically generates Vitest test files for TypeScript/TSX files",
   "version": "0.1.0",
-  "publisher": "matcher",
+  "publisher": "matcher9131",
   "engines": {
     "vscode": "^1.93.0"
   },
