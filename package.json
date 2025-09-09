@@ -4,6 +4,11 @@
   "description": "Automatically generates Vitest test files for TypeScript/TSX files",
   "version": "0.1.0",
   "publisher": "matcher9131",
+  "icon": "assets/virejo.png",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/matcher9131/virejo"
+  },
   "engines": {
     "vscode": "^1.93.0"
   },
