@@ -151,21 +151,21 @@ const {
     const barMock = -3;
     const bazMock = ["hoge", "fuga"];
     const setBazMock = vi.fn();
-    const useAtomMock = (atom: string) => {
+    const useAtomMock = vi.fn().mockImplementation((atom: string) => {
         // switch by argument and return test doubles of atom used in `useAtom`
         switch (atom) {
             case "fooAtom": return [fooMock, setFooMock];
             case "bazAtom": return [bazMock, setBazMock];
             default: throw new Error("Invalid atom");
         }
-    };
-    const useAtomValueMock = (atom: string) => {
+    });
+    const useAtomValueMock = vi.fn().mockImplementation((atom: string) => {
         // switch by argument and return test doubles of atom used in `useAtomValue`
         switch (atom) {
             case "barAtom": return barMock;
             default: throw new Error("Invalid atom");
         }
-    };
+    });
 
     // return all the test doubles as an object.
     return {

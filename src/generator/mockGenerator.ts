@@ -90,26 +90,6 @@ const generateReactCustomHooksMocks = (
                     hasJotaiMocks = true;
                     const mockName = generateMockName(importName);
                     mockNames.push(mockName);
-                    
-                    if (importName === 'useAtom') {
-                        hoistedDeclarations.push(
-                            `    const ${mockName} = (atom: string) => {`,
-                            `        switch (atom) {`,
-                            `            // Add cases based on atoms used in useAtom`,
-                            `            default: throw new Error("Invalid atom");`,
-                            `        }`,
-                            `    };`
-                        );
-                    } else if (importName === 'useAtomValue') {
-                        hoistedDeclarations.push(
-                            `    const ${mockName} = (atom: string) => {`,
-                            `        switch (atom) {`,
-                            `            // Add cases based on atoms used in useAtomValue`,
-                            `            default: throw new Error("Invalid atom");`,
-                            `        }`,
-                            `    };`
-                        );
-                    }
                 }
             });
         } else {
@@ -183,9 +163,53 @@ const generateReactCustomHooksMocks = (
         }
     });
 
-    // Add jotai partial mock if needed
+    // Generate jotai hook implementations after collecting all atoms and their mocks
     // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
     if (hasJotaiMocks) {
+        const useAtomCases: string[] = [];
+        const useAtomValueCases: string[] = [];
+        
+        atoms.forEach(atom => {
+            if (atom.usedInUseAtom) {
+                const baseName = atom.name.replace('Atom', '');
+                const valueMock = `${baseName}Mock`;
+                const setterMock = `set${baseName.charAt(0).toUpperCase() + baseName.slice(1)}Mock`;
+                useAtomCases.push(`            case "${atom.name}": return [${valueMock}, ${setterMock}];`);
+            }
+            
+            if (atom.usedInUseAtomValue) {
+                const valueMock = `${atom.name.replace('Atom', '')}Mock`;
+                useAtomValueCases.push(`            case "${atom.name}": return ${valueMock};`);
+            }
+        });
+        
+        // Generate useAtom mock if needed
+        if (mockNames.includes('useAtomMock')) {
+            hoistedDeclarations.push(
+                `    const useAtomMock = vi.fn().mockImplementation((atom: string) => {`,
+                `        // switch by argument and return test doubles of atom used in \`useAtom\``,
+                `        switch (atom) {`,
+                ...useAtomCases,
+                `            default: throw new Error("Invalid atom");`,
+                `        }`,
+                `    });`
+            );
+        }
+        
+        // Generate useAtomValue mock if needed
+        if (mockNames.includes('useAtomValueMock')) {
+            hoistedDeclarations.push(
+                `    const useAtomValueMock = vi.fn().mockImplementation((atom: string) => {`,
+                `        // switch by argument and return test doubles of atom used in \`useAtomValue\``,
+                `        switch (atom) {`,
+                ...useAtomValueCases,
+                `            default: throw new Error("Invalid atom");`,
+                `        }`,
+                `    });`
+            );
+        }
+        
+        // Add jotai partial mock
         const jotaiMockEntries = mockNames
             .filter(name => name.includes('useAtom'))
             .map(name => `        ${name.replace('Mock', '')}: ${name}`);
